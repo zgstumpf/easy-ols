@@ -2,16 +2,28 @@ import pandas as pd
 from statsmodels.formula.api import ols
 import matplotlib.pyplot as plt
 
+from typing import Union, List
+
 class EasyOLS:
     """
-    Generates conclusions and plot based on OLS summary data.
-    Works with 1 dependent variable and 1 or many independent variables.
-    Wrapper for statsmodels.formula.api.ols. 
+    Easily generate readable conclusions and plot based on OLS summary data.
+    Works with 1 dependent variable and 1+ independent variables.
     
     Parameters:
     - dependent_var (str) - Column name of pandas.DataFrame
     - independent_vars (str or list(str)) - Column name(s) of pandas.DataFrame
-    - df (pandas.DataFrame)
+    - df - (pandas.DataFrame)
+    
+    Methods:
+    - print_summary() - Prints standard statsmodels ols summary and prints human-friendly 
+    conclusions below.
+    - plot() - Prints scatterplot of original data and predicted values
+        - Parameters (optional):
+            - title (str)
+            - xlabel (str)
+            - ylabel (str)
+            - description (str)
+    
     
     Properties:
     - coefficients (pandas.Series) - Calculated coefficients of intercept and 
@@ -29,17 +41,9 @@ class EasyOLS:
     - internal_independent_vars
 
     
-    Methods:
-    - print_summary: Prints standard statsmodels ols summary and prints conclusions
-    below.
-    - plot: Prints scatterplot of original data and predicted values
-        - Parameters (all optional, will override defaults if provided):
-            - title (str)
-            - xlabel (str)
-            - ylabel (str)
-            - description (str)
+
     """
-    def __init__(self, dependent_var, independent_vars, df):
+    def __init__(self, dependent_var: str, independent_vars: Union[str, List[str]], df):
         if not isinstance(dependent_var, str):
             raise ValueError("dependent_var must be a string")
 
@@ -151,8 +155,7 @@ class EasyOLS:
         print(self.model.summary())
 
         # Append EasyOLS conclusions below
-        print("")
-        print("Conclusions:")
+        print("\nConclusions:")
 
         dependent_var = self.__format_var(self.internal_dependent_var)
         independent_vars = [self.__format_var(var) for var in self.internal_independent_vars]
@@ -167,9 +170,10 @@ class EasyOLS:
 
         for i in range(0, len(independent_vars)):
             # format as %, round to 2 decimal places
-            confidence = '{:.2%}'.format(self.confidences[i])
+            confidence = '{:.2%}'.format(self.confidences.iloc[i])
             # round to 2 decimal places
-            coefficient = "{:.2f}".format(self.coefficients[i])
+            coefficient = "{:.2f}".format(self.coefficients.iloc[i])
+
 
             # Definitions from Example 2 from https://www.statology.org/intercept-in-regression/
             if i==0:
